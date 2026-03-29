@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 500px; margin: 4rem auto;">
+    <h2 style="margin-bottom: 2rem; text-align: center; font-size: 2rem;">Create Account</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: #f87171; font-size: 0.8rem; margin-top: 5px;">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 1rem;">Register</button>
+    </form>
+    <div style="margin-top: 1.5rem; text-align: center; color: var(--text-dim);">
+        Already have an account? <a href="{% url 'login' %}" style="color: var(--primary); text-decoration: none;">Login here</a>
+    </div>
+</div>
+
+<style>
+    input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+    }
+    input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+</style>
+{% endblock %}

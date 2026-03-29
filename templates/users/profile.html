@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px;">
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+        <!-- Profile Info -->
+        <div>
+            <div class="glass-card" style="text-align: center; margin-bottom: 2rem;">
+                <div style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--primary); overflow: hidden; margin: 0 auto 1.5rem; background: #1e293b; display: flex; align-items: center; justify-content: center;">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <i class="fas fa-user-circle" style="font-size: 80px; color: var(--text-dim);"></i>
+                    {% endif %}
+                </div>
+                <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">{{ user.username }}</h2>
+                <div style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.4rem 1rem; border-radius: 20px; display: inline-block; font-weight: 700; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    {{ total_reports }} Analyses Done
+                </div>
+                
+                <h4 style="color: var(--text-dim); margin-bottom: 1rem; text-align: left; font-size: 1rem;">Update Profile</h4>
+                <form method="POST" enctype="multipart/form-data" style="text-align: left;">
+                    {% csrf_token %}
+                    {% for field in p_form %}
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="font-size: 0.85rem;">{{ field.label }}</label>
+                            <div class="custom-input">
+                                {{ field }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Save Profile</button>
+                </form>
+                <div style="margin-top: 1.5rem; border-top: 1px solid rgba(239, 68, 68, 0.1); padding-top: 1.5rem;">
+                    <button onclick="openDeleteAccountModal()" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; width: 100%; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.85rem;">
+                        <i class="fas fa-user-times"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History & Activity -->
+        <div>
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fas fa-history" style="color: var(--primary);"></i> My Recent Analyses
+            </h3>
+
+            {% if user_reports %}
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for report in user_reports %}
+                        <a href="{% url 'analysis_result' report.id %}" style="text-decoration: none; color: inherit;">
+                            <div class="glass-card" style="padding: 1.2rem; transition: 0.3s; border: 1px solid var(--glass-border);" onmouseover="this.style.border='1px solid var(--primary)'" onmouseout="this.style.border='1px solid var(--glass-border)'">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                                    <span style="font-weight: 700;">{{ report.github_username }}</span>
+                                    <div style="background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; font-weight: 800;">
+                                        {{ report.score }}/100
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.8rem;">
+                                    {% for skill in report.skills|slice:":3" %}
+                                        <span style="font-size: 0.65rem; background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid rgba(99, 102, 241, 0.2);">
+                                            {{ skill }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.4rem;">
+                                    <i class="far fa-clock"></i> {{ report.created_at|date:"M d, Y" }}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                    <a href="{% url 'history' %}" class="btn btn-outline" style="text-align: center; padding: 0.8rem;">View Full History</a>
+                </div>
+            {% else %}
+                <div class="glass-card" style="text-align: center; padding: 3rem;">
+                    <i class="fas fa-ghost" style="font-size: 2.5rem; color: var(--text-dim); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-dim);">No analyses yet. Start exploring!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Account Delete Confirmation Modal -->
+<div id="deleteAccountModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="glass-card" style="max-width: 450px; width: 90%; padding: 2.5rem; text-align: center; border: 1px solid rgba(239, 68, 68, 0.3);">
+        <div style="width: 70px; height: 70px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 2rem; margin: 0 auto 1.5rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2 style="margin-bottom: 1rem; color: #ef4444;">Delete Account?</h2>
+        <p style="color: var(--text-dim); margin-bottom: 2rem;">Are you sure you want to delete your account? This action is <strong>permanent</strong> and will remove all your data, including your analysis history.</p>
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="closeDeleteAccountModal()" class="btn btn-outline" style="flex: 1;">Cancel</button>
+            <form action="{% url 'delete_account' %}" method="POST" style="flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="width: 100%; background: #ef4444; border-color: #ef4444;">Permanently Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteAccountModal() {
+        document.getElementById('deleteAccountModal').style.display = 'flex';
+    }
+
+    function closeDeleteAccountModal() {
+        document.getElementById('deleteAccountModal').style.display = 'none';
+    }
+
+    // Close on click outside
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('deleteAccountModal')) {
+            closeDeleteAccountModal();
+        }
+    }
+</script>
+
+<style>
+    .custom-input input, .custom-input textarea, .custom-input select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+    }
+    .custom-input input:focus, .custom-input textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+</style>
+{% endblock %}

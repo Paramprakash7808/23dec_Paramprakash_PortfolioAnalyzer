@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparison: {{ report1.github_username }} vs {{ report2.github_username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 4rem;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Comparison Results</h1>
+        <div style="display: inline-block; padding: 0.5rem 1.5rem; background: var(--primary); color: white; border-radius: 30px; font-weight: 700; font-size: 1.2rem;">
+            Winner: <span style="text-transform: uppercase;">{{ winner }}</span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: stretch;">
+        <!-- Developer 1 -->
+        <div class="glass-card {% if winner == report1.github_username %}winner-glow{% endif %}" style="text-align: center;">
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">@{{ report1.github_username }}</h2>
+            <div style="font-size: 4rem; font-weight: 800; margin: 2rem 0;">{{ report1.score }}</div>
+            <p style="color: var(--text-dim); margin-bottom: 2rem;">Total Score</p>
+            
+            <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 15px;">
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+                    <span>Repos</span> <strong>{{ report1.total_repos }}</strong>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+                    <span>Stars</span> <strong>{{ report1.total_stars }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Techs</span> <strong>{{ report1.languages|length }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: var(--text-dim);">VS</div>
+
+        <!-- Developer 2 -->
+        <div class="glass-card {% if winner == report2.github_username %}winner-glow{% endif %}" style="text-align: center;">
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">@{{ report2.github_username }}</h2>
+            <div style="font-size: 4rem; font-weight: 800; margin: 2rem 0;">{{ report2.score }}</div>
+            <p style="color: var(--text-dim); margin-bottom: 2rem;">Total Score</p>
+            
+            <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 15px;">
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+                    <span>Repos</span> <strong>{{ report2.total_repos }}</strong>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between;">
+                    <span>Stars</span> <strong>{{ report2.total_stars }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Techs</span> <strong>{{ report2.languages|length }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 4rem; text-align: center;">
+        <a href="{% url 'compare' %}" class="btn btn-primary" style="padding: 1rem 3rem;">Compare Others</a>
+    </div>
+</div>
+
+<style>
+    .winner-glow {
+        border: 2px solid var(--primary) !important;
+        box-shadow: 0 0 30px var(--primary-glow) !important;
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %}

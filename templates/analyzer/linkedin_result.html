@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Career Power-Up - {{ report.full_name }}{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem; margin-bottom: 4rem;">
+    <!-- Top Summary Card -->
+    <div class="glass-card" style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 2rem; align-items: center; border-left: 6px solid #0077b5;">
+        <div style="position: relative; width: 120px; height: 120px;">
+            <svg style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                <circle cx="60" cy="60" r="45" style="fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8;"></circle>
+                <circle cx="60" cy="60" r="45" style="fill: none; stroke: #0077b5; stroke-width: 8; stroke-dasharray: 282.7; stroke-dashoffset: {{ dash_offset }}; stroke-linecap: round; transition: 1.5s ease-out;"></circle>
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <span style="font-size: 1.8rem; font-weight: 800; display: block;">{{ report.professional_score }}</span>
+                <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Overall</span>
+            </div>
+        </div>
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: #0077b5; font-weight: 700; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">Career Power-Up Enabled</p>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem;">{{ report.full_name }}</h1>
+            <p style="color: var(--text-dim); font-size: 1.1rem;">{{ report.headline|default:"Professional Profile" }}</p>
+        </div>
+        {% if report.jd_match_score > 0 %}
+        <div class="glass-card" style="padding: 1rem 2rem; text-align: center; border: 1px solid #0077b5; background: rgba(0, 119, 181, 0.1);">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #0077b5;">{{ report.jd_match_score }}%</div>
+            <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">JD Match</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Generated Headlines -->
+    <div class="glass-card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(0, 119, 181, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-magic" style="color: #0077b5;"></i> Suggested Professional Headlines
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+            {% for headline in report.suggested_headlines %}
+            <div style="background: var(--glass-bg); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; display: flex; align-items: center; justify-content: space-between;">
+                <p style="font-weight: 600; color: var(--text-main); font-size: 1rem; margin: 0;">{{ headline }}</p>
+                <button onclick="navigator.clipboard.writeText('{{ headline }}'); alert('Headline copied!')" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: rgba(0, 119, 181, 0.1); color: #0077b5;"><i class="far fa-copy"></i> Copy</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+        <!-- Experience Timeline -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fas fa-route" style="color: #0ea5e9;"></i> Professional Timeline
+            </h3>
+            <div style="position: relative; padding-left: 2rem; border-left: 2px dashed rgba(0, 119, 181, 0.3); margin-left: 0.5rem;">
+                {% for exp in report.experience_data %}
+                <div style="position: relative; margin-bottom: 2rem;">
+                    <div style="position: absolute; left: -2.3rem; top: 0; width: 12px; height: 12px; background: #0077b5; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 119, 181, 0.5);"></div>
+                    <div style="font-size: 0.75rem; font-weight: 700; color: #0077b5; text-transform: uppercase;">{{ exp.date }}</div>
+                    <div style="font-weight: 600; font-size: 1rem;">{{ exp.title }}</div>
+                </div>
+                {% empty %}
+                <p style="color: var(--text-dim); font-style: italic;">No specific timeline events detected in the provided text.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fas fa-chart-pie" style="color: #0077b5;"></i> Analysis Breakdown
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem;">
+                        <span>Summary Quality</span>
+                        <span style="font-weight: 700;">{{ report.summary_strength }}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {{ report.summary_strength }}%; height: 100%; background: #0077b5;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem;">
+                        <span>Impact Factor</span>
+                        <span style="font-weight: 700;">{{ report.experience_impact }}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {{ report.experience_impact }}%; height: 100%; background: #0ea5e9;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem;">
+                        <span>Recruiter Visibility</span>
+                        <span style="font-weight: 700;">{{ report.keyword_density }}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {{ report.keyword_density }}%; height: 100%; background: #38bdf8;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 2rem 0 1rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-tags" style="color: #38bdf8;"></i> Detected Skills
+            </h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% for keyword in report.impact_keywords %}
+                    <span style="background: rgba(56, 189, 248, 0.1); color: #38bdf8; padding: 0.3rem 0.8rem; border-radius: 30px; font-size: 0.75rem; border: 1px solid rgba(56, 189, 248, 0.2);">
+                        {{ keyword|title }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Optimization Suggestions -->
+    <div class="glass-card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-lightbulb" style="color: #fca311;"></i> Career Strategies
+        </h3>
+        <div style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); display: grid; gap: 1rem;">
+            {% for suggestion in report.suggestions %}
+            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(252, 163, 17, 0.05); border-radius: 12px; border: 1px solid rgba(252, 163, 17, 0.1); font-size: 0.9rem;">
+                <i class="fas fa-chevron-right" style="color: #fca311; margin-top: 0.2rem;"></i>
+                <span>{{ suggestion }}</span>
+            </div>
+            {% endfor %}
+            {% if report.jd_match_score < 60 and report.jd_match_score > 0 %}
+            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.1); font-size: 0.9rem;">
+                <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-top: 0.2rem;"></i>
+                <span>Low JD Match. Consider tailoring your experience section with more keywords from the job description.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'dashboard' %}" class="btn btn-primary" style="padding: 1rem 3rem;"><i class="fas fa-redo"></i> Analyze New Profile</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}My History - Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 style="margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem;">
+        <i class="fas fa-history" style="color: var(--primary);"></i> Your Analysis History
+    </h2>
+
+    <!-- Tab Switcher -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; background: rgba(0,0,0,0.2); padding: 0.4rem; border-radius: 12px; max-width: 500px;">
+        <button onclick="switchHistoryTab('github')" id="tab-github" class="btn" style="flex: 1; background: var(--primary); color: white; border-radius: 8px; font-size: 0.9rem;">
+            <i class="fab fa-github"></i> Technical (GitHub)
+        </button>
+        <button onclick="switchHistoryTab('linkedin')" id="tab-linkedin" class="btn" style="flex: 1; background: transparent; color: var(--text-dim); border-radius: 8px; font-size: 0.9rem;">
+            <i class="fab fa-linkedin"></i> Professional (LinkedIn)
+        </button>
+    </div>
+
+    <!-- GitHub History -->
+    <div id="github-history">
+        {% if github_reports %}
+            <div class="glass-card" style="padding: 0; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 1.5rem;">GitHub Username</th>
+                            <th style="padding: 1.5rem;">Score</th>
+                            <th style="padding: 1.5rem;">Date</th>
+                            <th style="padding: 1.5rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in github_reports %}
+                            <tr style="border-bottom: 1px solid var(--glass-border); transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.5rem; font-weight: 600;">@{{ report.github_username }}</td>
+                                <td style="padding: 1.5rem;">
+                                    <span style="background: var(--primary); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                                        {{ report.score }}/100
+                                    </span>
+                                </td>
+                                <td style="padding: 1.5rem; color: var(--text-dim);">{{ report.created_at|date:"M j, Y" }}</td>
+                                <td style="padding: 1.5rem; display: flex; gap: 0.5rem;">
+                                    <a href="{% url 'analysis_result' report.id %}" class="btn" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.4rem 0.8rem;">View</a>
+                                    <form action="{% url 'delete_report' report.id %}" method="POST" onsubmit="return confirm('Delete this GitHub report?')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 0.4rem 0.8rem;"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="glass-card" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-dim);">No GitHub reports found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- LinkedIn History (Hidden by default) -->
+    <div id="linkedin-history" style="display: none;">
+        {% if linkedin_reports %}
+            <div class="glass-card" style="padding: 0; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="background: rgba(0, 119, 181, 0.05); border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 1.5rem;">Full Name</th>
+                            <th style="padding: 1.5rem;">Prof. Score</th>
+                            <th style="padding: 1.5rem;">Date</th>
+                            <th style="padding: 1.5rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in linkedin_reports %}
+                            <tr style="border-bottom: 1px solid var(--glass-border); transition: 0.3s;" onmouseover="this.style.background='rgba(0, 119, 181, 0.02)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.5rem; font-weight: 600;">{{ report.full_name }}</td>
+                                <td style="padding: 1.5rem;">
+                                    <span style="background: #0077b5; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                                        {{ report.professional_score }}/100
+                                    </span>
+                                </td>
+                                <td style="padding: 1.5rem; color: var(--text-dim);">{{ report.created_at|date:"M j, Y" }}</td>
+                                <td style="padding: 1.5rem; display: flex; gap: 0.5rem;">
+                                    <a href="{% url 'linkedin_result' report.id %}" class="btn" style="background: rgba(0, 119, 181, 0.1); color: #0077b5; padding: 0.4rem 0.8rem;">View</a>
+                                    <form action="{% url 'delete_linkedin_report' report.id %}" method="POST" onsubmit="return confirm('Delete this LinkedIn report?')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 0.4rem 0.8rem;"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="glass-card" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-dim);">No LinkedIn reports found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function switchHistoryTab(type) {
+        const ghTab = document.getElementById('tab-github');
+        const lnTab = document.getElementById('tab-linkedin');
+        const ghSection = document.getElementById('github-history');
+        const lnSection = document.getElementById('linkedin-history');
+
+        if (type === 'github') {
+            ghTab.style.background = 'var(--primary)';
+            ghTab.style.color = 'white';
+            lnTab.style.background = 'transparent';
+            lnTab.style.color = 'var(--text-dim)';
+            ghSection.style.display = 'block';
+            lnSection.style.display = 'none';
+        } else {
+            lnTab.style.background = '#0077b5';
+            lnTab.style.color = 'white';
+            ghTab.style.background = 'transparent';
+            ghTab.style.color = 'var(--text-dim)';
+            lnSection.style.display = 'block';
+            ghSection.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Result - {{ report.github_username }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px;">
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Report for <span style="color: var(--primary);">@{{ report.github_username }}</span></h1>
+            <p style="color: var(--text-dim);">Generated on {{ report.created_at|date:"F j, Y" }}</p>
+        </div>
+        <div class="no-print" style="display: flex; gap: 1rem;">
+            <button onclick="window.print()" class="btn btn-primary" style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">
+                <i class="fas fa-download"></i> PDF
+            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button id="shareBtn" class="btn btn-primary" style="background: var(--primary); display: flex; align-items: center; gap: 0.5rem; transition: 0.3s;" title="Copy Link">
+                    <i class="fas fa-link"></i> <span>Copy</span>
+                </button>
+                <a href="#" id="shareLinkedIn" target="_blank" class="btn btn-outline" style="padding: 0.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #0077b5; border-color: rgba(0, 119, 181, 0.3);" title="Share on LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" id="shareX" target="_blank" class="btn" style="padding: 0.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; background: #000000; border-radius: 8px; transition: 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" title="Share on X" onmouseover="this.style.background='#222'" onmouseout="this.style.background='#000'">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const reportUrl = window.location.href;
+        const reportTitle = "Check out my Developer Portfolio Analysis!";
+
+        // Social Share Links
+        document.getElementById('shareLinkedIn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(reportUrl)}`;
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(reportTitle)}&url=${encodeURIComponent(reportUrl)}`;
+
+        // Copy Link function
+        document.getElementById('shareBtn').onclick = function() {
+            const btn = this;
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span');
+            
+            navigator.clipboard.writeText(reportUrl).then(() => {
+                const originalText = text.innerText;
+                const originalIcon = icon.className;
+                
+                text.innerText = 'Copied!';
+                icon.className = 'fas fa-check';
+                btn.style.background = '#22c55e';
+                
+                setTimeout(() => {
+                    text.innerText = originalText;
+                    icon.className = originalIcon;
+                    btn.style.background = 'var(--primary)';
+                }, 2000);
+            });
+        }
+    </script>
+
+    <!-- Main Score Card -->
+    <div class="stats-row" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem;">
+        <div class="glass-card score-card" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px solid var(--primary);">
+            <h3 style="color: var(--text-dim); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;">Portfolio Score</h3>
+            <div style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
+                <svg width="180" height="180" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" class="print-circle-bg"></circle>
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="8" 
+                            stroke-dasharray="282.7" stroke-dashoffset="{{ dash_offset }}"
+                            style="transition: 1s ease-out;" class="print-circle-fill"></circle>
+                </svg>
+                <div class="score-text" style="position: absolute; font-size: 3rem; font-weight: 800; color: white;">
+                    {{ report.score }}
+                </div>
+            </div>
+            <div class="print-only" style="font-size: 1.5rem; font-weight: 700; margin-top: 10px;">Score: {{ report.score }}/100</div>
+            <p style="margin-top: 1rem; font-weight: 600; color: var(--text-dim);">Out of 100 points</p>
+        </div>
+
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem;">Basic Statistics</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div style="background: rgba(15, 23, 42, 0.4); padding: 1.5rem; border-radius: 15px;">
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">Total Repositories</div>
+                    <div style="font-size: 1.8rem; font-weight: 700;">{{ report.total_repos }}</div>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.4); padding: 1.5rem; border-radius: 15px;">
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">Total Stars</div>
+                    <div style="font-size: 1.8rem; font-weight: 700;">{{ report.total_stars }}</div>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.4); padding: 1.5rem; border-radius: 15px;">
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">Languages Used</div>
+                    <div style="font-size: 1.8rem; font-weight: 700;">{{ report.languages|length }}</div>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.4); padding: 1.5rem; border-radius: 15px;">
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">Account Age</div>
+                    <div style="font-size: 1.8rem; font-weight: 700;">{{ report.account_age_years }} Years</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills & Weaknesses -->
+    <div class="split-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; color: #4ade80;"><i class="fas fa-bolt"></i> Detected Skills</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
+                {% for skill in report.skills %}
+                    <div style="background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 600;">
+                        {{ skill }}
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-dim);">No specific skills detected based on repo data.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; color: #f87171;"><i class="fas fa-exclamation-triangle"></i> Identified Weaknesses</h3>
+            <ul style="list-style: none;">
+                {% for weakness in report.weaknesses %}
+                    <li style="margin-bottom: 0.8rem; display: flex; gap: 0.5rem; align-items: flex-start; color: #f87171;">
+                        <i class="fas fa-minus-circle" style="margin-top: 4px;"></i> <span>{{ weakness }}</span>
+                    </li>
+                {% empty %}
+                    <li style="color: #4ade80;"><i class="fas fa-check-circle"></i> No major weaknesses found!</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="glass-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-lightbulb" style="color: #fbbf24;"></i> Smart Suggestions for Improvement
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+            {% for suggestion in report.suggestions %}
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 15px; border-left: 4px solid var(--primary);">
+                    {{ suggestion }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .print-only { display: none; }
+    
+    @media print {
+        @page { margin: 1cm; size: A4; }
+        
+        /* Hide UI elements */
+        .no-print, .navbar, .btn, .share-btn, #theme-toggle, .messages { display: none !important; }
+        .print-only { display: block !important; }
+        
+        /* Reset Body & Containers */
+        body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+        .container { max-width: 100% !important; margin: 0 !important; width: 100% !important; padding: 0 !important; }
+        
+        /* Layout Alignment */
+        .stats-row, .split-row { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 1.5rem !important; 
+            margin-bottom: 2rem !important;
+        }
+        
+        .glass-card { 
+            background: white !important; 
+            border: 1px solid #e2e8f0 !important; 
+            box-shadow: none !important; 
+            color: black !important; 
+            page-break-inside: avoid;
+            margin-bottom: 2rem !important;
+            backdrop-filter: none !important;
+            border-radius: 12px !important;
+            padding: 1.5rem !important;
+            width: 100% !important;
+        }
+        
+        .score-card { 
+            max-width: 500px !important; 
+            margin: 0 auto 2rem !important; 
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+        
+        .score-text { 
+            color: #6366f1 !important; 
+            position: absolute !important; 
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            font-size: 3.5rem !important;
+            font-weight: 800 !important;
+        }
+
+        svg { margin: 0 auto !important; display: block !important; }
+        
+        h1, h2, h3 { color: #1e293b !important; text-align: center !important; margin-bottom: 1rem !important; }
+        .text-dim { color: #64748b !important; text-align: center !important; }
+        
+        /* Content boxes */
+        [style*="background: rgba(15, 23, 42, 0.4)"],
+        [style*="background: rgba(255,255,255,0.05)"],
+        [style*="background: rgba(74, 222, 128, 0.1)"] {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #1e293b !important;
+            box-shadow: none !important;
+        }
+
+        [style*="color: #4ade80"] { color: #166534 !important; } /* Skills Green */
+        [style*="color: #f87171"] { color: #991b1b !important; } /* Weakness Red */
+        
+        /* Force padding for print */
+        [style*="padding: 1.5rem"] { padding: 1.2rem !important; }
+        
+        /* Header Adjustment */
+        [style*="justify-content: space-between; align-items: flex-end"] {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            margin-bottom: 3rem !important;
+        }
+        
+        /* SVG Circle Colors for Print */
+        .print-circle-bg { stroke: #f1f5f9 !important; }
+        .print-circle-fill { stroke: #6366f1 !important; }
+        
+        /* Footer for PDF */
+        body::after {
+            content: "Produced by PortfolioAnalyzer - Professional Developer Assessment Report";
+            display: block;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 3rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+        }
+
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+</style>
+{% endblock %}

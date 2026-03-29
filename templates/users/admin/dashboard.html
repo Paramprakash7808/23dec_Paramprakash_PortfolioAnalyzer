@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<div style="margin-top: 2rem; margin-bottom: 4rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+        <div>
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(90deg, #6366f1, #a855f7); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                User Management
+            </h1>
+            <p style="color: var(--text-dim); font-size: 1.1rem;">Monitor and manage all registered developers.</p>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        <div class="glass-card" style="padding: 1.5rem; border-left: 4px solid var(--primary);">
+            <p style="color: var(--text-dim); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Total Users</p>
+            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">{{ total_users }}</h3>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem; border-left: 4px solid var(--secondary);">
+            <p style="color: var(--text-dim); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Total Analyses</p>
+            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">{{ total_reports }}</h3>
+            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">
+                {{ github_count }} GH | {{ linkedin_count }} LI
+            </div>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem; border-left: 4px solid #fca311;">
+            <p style="color: var(--text-dim); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Average Score</p>
+            <h3 style="font-size: 2rem; font-weight: 800; margin: 0;">{{ avg_score }}</h3>
+        </div>
+        <div class="glass-card" style="padding: 1.5rem; border-left: 4px solid #a855f7;">
+            <p style="color: var(--text-dim); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.8rem;">Top Tech Distribution</p>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                {% for lang, count in top_languages %}
+                    <div style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.2rem;">
+                            <span>{{ lang }}</span>
+                            <span style="color: var(--text-dim);">{{ count }}</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {% widthratio count total_reports 100 %}%; height: 100%; background: var(--secondary); border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="glass-card" style="margin-bottom: 2rem; padding: 1.5rem;">
+        <form method="GET" style="display: flex; gap: 1rem;">
+            <div style="flex-grow: 1; position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by username, email, or GitHub..." style="padding-left: 3rem;">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline" style="display: flex; align-items: center; justify-content: center;">Reset</a>
+        </form>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- User Table -->
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between;">
+                <h3 style="margin: 0;">User Management</h3>
+                <span style="font-size: 0.85rem; color: var(--text-dim);">Showing {{ users.count }} results</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                    <thead>
+                        <tr style="text-align: left; background: rgba(99, 102, 241, 0.05);">
+                            <th style="padding: 1.2rem 1.5rem; color: var(--text-dim); font-weight: 600;">User</th>
+                            <th style="padding: 1.2rem 1.5rem; color: var(--text-dim); font-weight: 600;">Reports</th>
+                            <th style="padding: 1.2rem 1.5rem; text-align: right; color: var(--text-dim); font-weight: 600;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.02)'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 1rem 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700;">
+                                        {{ u.username|make_list|first|upper }}
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'admin_user_reports' u.id %}" style="text-decoration: none; font-weight: 600; color: var(--primary); font-size: 0.9rem;">{{ u.username }}</a>
+                                        {% if u.profile.is_blocked %}<span style="font-size: 0.7rem; color: #ef4444; margin-left: 0.5rem;">[Blocked]</span>{% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.5rem;">
+                                <span style="font-size: 0.85rem; background: rgba(255, 255, 255, 0.1); padding: 0.2rem 0.5rem; border-radius: 4px;">{{ u.analyses.count }}</span>
+                            </td>
+                            <td style="padding: 1rem 1.5rem; text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 0.4rem;">
+                                    <a href="{% url 'toggle_user_block' u.id %}" title="{% if u.profile.is_blocked %}Unblock{% else %}Block{% endif %}" style="color: {% if u.profile.is_blocked %}#22c55e{% else %}#fca311{% endif %}; font-size: 1rem;"><i class="fas {% if u.profile.is_blocked %}fa-user-check{% else %}fa-user-slash{% endif %}"></i></a>
+                                    <button onclick="confirmDelete({{ u.id }}, '{{ u.username }}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem;"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Activity Logs -->
+        <div class="glass-card" style="padding: 0;">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--glass-border);">
+                <h3 style="margin: 0;"><i class="fas fa-history" style="color: var(--secondary); margin-right: 0.5rem;"></i> Recent Activity</h3>
+            </div>
+            <div style="padding: 1rem;">
+                {% if logs %}
+                    {% for log in logs %}
+                        <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
+                            <div style="color: var(--primary); font-weight: 700; margin-bottom: 0.2rem;">{{ log.admin.username }}</div>
+                            <div style="color: var(--text-main); margin-bottom: 0.4rem;">{{ log.action }}</div>
+                            <div style="color: var(--text-dim); font-size: 0.75rem;">{{ log.timestamp|timesince }} ago</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: var(--text-dim); padding: 2rem;">No recent activity.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="glass-card" style="max-width: 450px; width: 90%; padding: 2.5rem; text-align: center;">
+        <div style="width: 70px; height: 70px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 2rem; margin: 0 auto 1.5rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2 style="margin-bottom: 1rem;">Delete User?</h2>
+        <p style="color: var(--text-dim); margin-bottom: 2rem;">Are you sure you want to delete <strong id="deleteUsername" style="color: white;"></strong>? This action is permanent and will remove all their data.</p>
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="closeDeleteModal()" class="btn btn-outline" style="flex: 1;">Cancel</button>
+            <a id="confirmDeleteBtn" href="#" class="btn" style="flex: 1; background: #ef4444; border-color: #ef4444;">Delete Permanently</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete(userId, username) {
+        document.getElementById('deleteUsername').innerText = username;
+        document.getElementById('confirmDeleteBtn').href = `/users/admin-dashboard/delete/${userId}/`;
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    // Close on click outside
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('deleteModal')) {
+            closeDeleteModal();
+        }
+    }
+</script>
+{% endblock %}

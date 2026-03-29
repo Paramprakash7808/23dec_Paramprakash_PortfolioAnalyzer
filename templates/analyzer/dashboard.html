@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Portfolio Analyzer{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 4rem; margin-top: 2rem;">
+    <h1 style="font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(90deg, #6366f1, #a855f7); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        Analyze Your Dev Portfolio
+    </h1>
+    <p style="color: var(--text-dim); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+        Enter a GitHub username to get a comprehensive quality score, skill detection, and actionable suggestions.
+    </p>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; max-width: 800px; margin: 0 auto 3rem;">
+    <a href="{% url 'compare' %}" style="text-decoration: none; color: inherit;">
+        <div class="glass-card" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--glass-border)'">
+            <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem;">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">Compare Developers</h3>
+                <p style="font-size: 0.85rem; color: var(--text-dim);">Battle against another dev.</p>
+            </div>
+        </div>
+    </a>
+    <a href="{% url 'history' %}" style="text-decoration: none; color: inherit;">
+        <div class="glass-card" style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; transition: 0.3s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--secondary)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--glass-border)'">
+            <div style="width: 50px; height: 50px; background: rgba(168, 85, 247, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #a855f7; font-size: 1.5rem;">
+                <i class="fas fa-history"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.2rem;">My History</h3>
+                <p style="font-size: 0.85rem; color: var(--text-dim);">Access your past analyses.</p>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="glass-card" style="max-width: 700px; margin: 0 auto;">
+    <!-- Tab Switcher -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; background: rgba(0,0,0,0.2); padding: 0.4rem; border-radius: 12px;">
+        <button onclick="switchTab('github')" id="tab-github" class="btn" style="flex: 1; background: var(--primary); color: white; border-radius: 8px; font-size: 0.9rem;">
+            <i class="fab fa-github"></i> GitHub Technical
+        </button>
+        <button onclick="switchTab('linkedin')" id="tab-linkedin" class="btn" style="flex: 1; background: transparent; color: var(--text-dim); border-radius: 8px; font-size: 0.9rem;">
+            <i class="fab fa-linkedin"></i> LinkedIn Professional
+        </button>
+    </div>
+
+    <!-- GitHub Form -->
+    <form method="POST" action="{% url 'analyze' %}" id="github-section">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem;">
+            <div style="flex-grow: 1; position: relative;">
+                <i class="fab fa-github" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                <input type="text" name="github_username" class="form-control" placeholder="GitHub Username or Profile Link" style="padding-left: 3rem; font-size: 1.1rem; height: 3.5rem;" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 3.5rem; padding: 0 2rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>Analyze</span> <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        {% if user.is_authenticated %}
+        <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim); font-size: 0.85rem;">
+            <input type="checkbox" name="is_public" id="is_public" checked style="cursor: pointer;">
+            <label for="is_public" style="cursor: pointer;">Make this analysis public</label>
+        </div>
+        {% endif %}
+    </form>
+
+    <!-- LinkedIn Form (Hidden by default) -->
+    <form method="POST" action="{% url 'analyze_linkedin' %}" id="linkedin-section" style="display: none;">
+        {% csrf_token %}
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <input type="text" name="full_name" class="form-control" placeholder="Full Name (for report)" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <textarea name="profile_text" class="form-control" rows="4" placeholder="Paste your LinkedIn 'About' section or 'Experience' descriptions here..." required style="resize: none;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <textarea name="target_jd" class="form-control" rows="3" placeholder="Paste a Job Description to check your compatibility (Optional)..." style="resize: none; font-size: 0.9rem; border-color: rgba(0, 119, 181, 0.3);"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; height: 3.5rem; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 1rem; background: #0077b5; border-color: #0077b5;">
+            <i class="fab fa-linkedin"></i> <span>Analyze Professional Profile</span>
+        </button>
+    </form>
+
+    <div id="loading-state" style="display: none; text-align: center; margin-top: 2rem;">
+        <div class="spinner"></div>
+        <p id="loading-text" style="margin-top: 1rem; color: var(--primary); font-weight: 600;">Fetching data from GitHub API...</p>
+    </div>
+</div>
+
+{% if latest_analyses %}
+<div style="margin-top: 4rem;">
+    <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+        <i class="fas fa-history" style="color: var(--primary);"></i> Recent Public Analyses
+    </h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        {% for report in latest_analyses %}
+            <a href="{% url 'analysis_result' report.id %}" style="text-decoration: none; color: inherit;">
+                <div class="glass-card" style="padding: 1.5rem; transition: 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-weight: 700; font-size: 1.1rem;">{{ report.github_username }}</span>
+                        <div style="background: var(--primary); color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.9rem; font-weight: 700;">
+                            {{ report.score }}/100
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% for skill in report.skills|slice:":3" %}
+                            <span style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(99, 102, 241, 0.2);">
+                                {{ skill }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(99, 102, 241, 0.1);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<script>
+    function switchTab(type) {
+        const ghTab = document.getElementById('tab-github');
+        const lnTab = document.getElementById('tab-linkedin');
+        const ghSection = document.getElementById('github-section');
+        const lnSection = document.getElementById('linkedin-section');
+        const loadText = document.getElementById('loading-text');
+
+        if (type === 'github') {
+            ghTab.style.background = 'var(--primary)';
+            ghTab.style.color = 'white';
+            lnTab.style.background = 'transparent';
+            lnTab.style.color = 'var(--text-dim)';
+            ghSection.style.display = 'block';
+            lnSection.style.display = 'none';
+            loadText.innerText = 'Fetching data from GitHub API...';
+        } else {
+            lnTab.style.background = '#0077b5';
+            lnTab.style.color = 'white';
+            ghTab.style.background = 'transparent';
+            ghTab.style.color = 'var(--text-dim)';
+            lnSection.style.display = 'block';
+            ghSection.style.display = 'none';
+            loadText.innerText = 'Analyzing professional profile content...';
+        }
+    }
+
+    document.getElementById('github-section').onsubmit = function() { showLoading(); }
+    document.getElementById('linkedin-section').onsubmit = function() { showLoading(); }
+    
+    function showLoading() {
+        document.getElementById('github-section').style.opacity = '0.5';
+        document.getElementById('linkedin-section').style.opacity = '0.5';
+        document.getElementById('github-section').style.pointerEvents = 'none';
+        document.getElementById('linkedin-section').style.pointerEvents = 'none';
+        document.getElementById('loading-state').style.display = 'block';
+    }
+</script>
+
+{% endblock %}
