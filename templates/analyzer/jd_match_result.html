@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}JD Match Result - {{ report.match_score }}%{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        @page {
+            margin: 1.5cm;
+            size: A4;
+        }
+        body {
+            background: white !important;
+            color: black !important;
+            padding: 0 !important;
+        }
+        nav, .navbar, .btn, .footer, .no-print, .action-buttons {
+            display: none !important;
+        }
+        .glass-card {
+            background: white !important;
+            border: 1px solid #eee !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+            margin-bottom: 1.5rem !important;
+            padding: 1.5rem !important;
+            color: black !important;
+            border-radius: 8px !important;
+        }
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        h1, h2, h3 {
+            color: #1a1a1a !important;
+            margin-top: 0 !important;
+            page-break-after: avoid;
+        }
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 3rem !important;
+            padding-bottom: 1.5rem !important;
+            border-bottom: 3px solid #a855f7 !important;
+            position: relative !important;
+        }
+        /* Fix for grid layout in print */
+        div[style*="display: grid"] {
+            display: block !important;
+        }
+        /* Ensure progress circle shows up */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    }
+    .print-header {
+        display: none;
+    }
+</style>
+
+<div class="print-header">
+    <h1 style="color: #a855f7; font-size: 2.5rem; margin-bottom: 0.5rem;">JD Match Analysis Report</h1>
+    <p style="color: #666; font-size: 1.1rem; margin: 0;">Portfolio Analyzer • Professional Assessment</p>
+</div>
+
+<div style="margin-top: 2rem; margin-bottom: 4rem;">
+    <!-- Top Summary Card -->
+    <div class="glass-card" style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 2rem; align-items: center; border-left: 6px solid #a855f7;">
+        <div style="position: relative; width: 120px; height: 120px;">
+            <svg style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                <circle cx="60" cy="60" r="45" style="fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8;"></circle>
+                <circle cx="60" cy="60" r="45" style="fill: none; stroke: #a855f7; stroke-width: 8; stroke-dasharray: 282.7; stroke-dashoffset: {{ dash_offset }}; stroke-linecap: round; transition: 1.5s ease-out;"></circle>
+            </svg>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <span style="font-size: 1.8rem; font-weight: 800; display: block;">{{ report.match_score }}</span>
+                <span style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Match %</span>
+            </div>
+        </div>
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: #a855f7; font-weight: 700; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">JD Compatibility Analysis</p>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem;">Match Result</h1>
+            <p style="color: var(--text-dim); font-size: 1.1rem;">Based on your professional summary and the job description provided.</p>
+        </div>
+        <div class="glass-card" style="padding: 1rem 2rem; text-align: center; border: 1px solid #a855f7; background: rgba(168, 85, 247, 0.1);">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #a855f7;">{{ report.matched_skills|length }}</div>
+            <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Skills Matched</div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+        <!-- Matched Skills -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fas fa-check-circle" style="color: #22c55e;"></i> Matched Keywords
+            </h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% for skill in report.matched_skills %}
+                    <span style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 0.3rem 0.8rem; border-radius: 30px; font-size: 0.8rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+                        {{ skill|title }}
+                    </span>
+                {% empty %}
+                    <p style="color: var(--text-dim); font-style: italic;">No significant matches found.</p>
+                {% endfor %}
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);">These keywords from the job description were found in your summary.</p>
+        </div>
+
+        <!-- Skill Gaps -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Identified Skill Gaps
+            </h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% for skill in report.missing_skills %}
+                    <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.3rem 0.8rem; border-radius: 30px; font-size: 0.8rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+                        {{ skill|title }}
+                    </span>
+                {% empty %}
+                    <p style="color: #22c55e; font-weight: 600;">Excellent! You've covered all key requirements.</p>
+                {% endfor %}
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);">These are important keywords from the JD that are missing or not prominent in your summary.</p>
+        </div>
+    </div>
+
+    <!-- Optimization Suggestions -->
+    <div class="glass-card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-lightbulb" style="color: #fca311;"></i> Recommendations to Improve Match
+        </h3>
+        <div style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); display: grid; gap: 1rem;">
+            {% for suggestion in report.suggestions %}
+            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(252, 163, 17, 0.05); border-radius: 12px; border: 1px solid rgba(252, 163, 17, 0.1); font-size: 0.95rem;">
+                <i class="fas fa-chevron-right" style="color: #fca311; margin-top: 0.2rem;"></i>
+                <span>{{ suggestion }}</span>
+            </div>
+            {% empty %}
+            <p style="color: var(--text-dim);">You have a strong profile for this JD!</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="action-buttons" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+        <a href="{% url 'dashboard' %}" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text-main); padding: 1rem 2rem; border-radius: 12px; border: 1px solid var(--glass-border);"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        <button onclick="window.print()" class="btn btn-primary" style="padding: 1rem 2rem; background: var(--primary);"><i class="fas fa-print"></i> Print Report</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import AnalysisReport, ComparisonHistory, LinkedInReport
+from .models import AnalysisReport, ComparisonHistory, JDMatchReport
 from .github_helper import GitHubHelper
-from .linkedin_helper import LinkedInHelper
+from .jd_helper import JDHelper
 import uuid
 
 def dashboard(request):
@@ -61,17 +61,17 @@ def analysis_result(request, report_id):
 @login_required
 def history(request):
     github_reports = AnalysisReport.objects.filter(user=request.user).order_by('-created_at')
-    linkedin_reports = LinkedInReport.objects.filter(user=request.user).order_by('-created_at')
+    jd_reports = JDMatchReport.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'analyzer/history.html', {
         'github_reports': github_reports,
-        'linkedin_reports': linkedin_reports
+        'jd_reports': jd_reports
     })
 
 @login_required
-def delete_linkedin_report(request, report_id):
-    report = get_object_or_404(LinkedInReport, id=report_id, user=request.user)
+def delete_jd_report(request, report_id):
+    report = get_object_or_404(JDMatchReport, id=report_id, user=request.user)
     report.delete()
-    messages.success(request, "Professional report deleted successfully.")
+    messages.success(request, "JD Match report deleted successfully.")
     return redirect('history')
 
 def compare_users(request):
@@ -116,47 +116,41 @@ def share_report(request, report_id):
     return render(request, 'analyzer/result.html', {'report': report, 'is_shared': True})
 
 
-def analyze_linkedin(request):
+def match_jd(request):
     if request.method == 'POST':
-        full_name = request.POST.get('full_name', 'Professional')
-        profile_text = request.POST.get('profile_text')
-        target_jd = request.POST.get('target_jd', '')
+        summary_text = request.POST.get('summary_text')
+        jd_text = request.POST.get('jd_text')
         
-        if not profile_text or len(profile_text) < 50:
-            messages.error(request, "Please provide a more detailed profile summary (at least 50 characters).")
+        if not summary_text or not jd_text:
+            messages.error(request, "Please provide both your summary and the job description.")
             return redirect('dashboard')
             
-        helper = LinkedInHelper()
-        analysis = helper.analyze_profile_text(profile_text, target_jd=target_jd)
+        helper = JDHelper()
+        analysis = helper.match_jd(summary_text, jd_text)
         
         if not analysis:
             messages.error(request, "Could not analyze the provided text.")
             return redirect('dashboard')
             
         # Save report
-        report = LinkedInReport.objects.create(
+        report = JDMatchReport.objects.create(
             user=request.user if request.user.is_authenticated else None,
-            full_name=full_name,
-            profile_text=profile_text,
-            target_jd=target_jd,
-            professional_score=analysis['professional_score'],
-            summary_strength=analysis['summary_strength'],
-            experience_impact=analysis['experience_impact'],
-            keyword_density=analysis['keyword_density'],
-            impact_keywords=analysis['impact_keywords'],
-            suggestions=analysis['suggestions'],
-            jd_match_score=analysis['jd_match_score'],
-            suggested_headlines=analysis['suggested_headlines'],
-            experience_data=analysis['experience_data']
+            summary_text=summary_text,
+            jd_text=jd_text,
+            match_score=analysis['match_score'],
+            matched_skills=analysis['matched_skills'],
+            missing_skills=analysis['missing_skills'],
+            suggestions=analysis['suggestions']
         )
         
-        return redirect('linkedin_result', report_id=report.id)
+        return redirect('jd_match_result', report_id=report.id)
     return redirect('dashboard')
 
-def linkedin_result(request, report_id):
-    report = get_object_or_404(LinkedInReport, id=report_id)
-    dash_offset = 282.7 - (282.7 * report.professional_score / 100)
-    return render(request, 'analyzer/linkedin_result.html', {
+def jd_match_result(request, report_id):
+    report = get_object_or_404(JDMatchReport, id=report_id)
+    # 282.7 is the circumference of a circle with r=45
+    dash_offset = 282.7 - (282.7 * report.match_score / 100)
+    return render(request, 'analyzer/jd_match_result.html', {
         'report': report, 
         'dash_offset': dash_offset
     })

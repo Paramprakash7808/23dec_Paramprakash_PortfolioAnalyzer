@@ -13,8 +13,8 @@
         <button onclick="switchHistoryTab('github')" id="tab-github" class="btn" style="flex: 1; background: var(--primary); color: white; border-radius: 8px; font-size: 0.9rem;">
             <i class="fab fa-github"></i> Technical (GitHub)
         </button>
-        <button onclick="switchHistoryTab('linkedin')" id="tab-linkedin" class="btn" style="flex: 1; background: transparent; color: var(--text-dim); border-radius: 8px; font-size: 0.9rem;">
-            <i class="fab fa-linkedin"></i> Professional (LinkedIn)
+        <button onclick="switchHistoryTab('jd')" id="tab-jd" class="btn" style="flex: 1; background: transparent; color: var(--text-dim); border-radius: 8px; font-size: 0.9rem;">
+            <i class="fas fa-file-contract"></i> JD Matcher
         </button>
     </div>
 
@@ -60,32 +60,32 @@
         {% endif %}
     </div>
 
-    <!-- LinkedIn History (Hidden by default) -->
-    <div id="linkedin-history" style="display: none;">
-        {% if linkedin_reports %}
+    <!-- JD History (Hidden by default) -->
+    <div id="jd-history" style="display: none;">
+        {% if jd_reports %}
             <div class="glass-card" style="padding: 0; overflow: hidden;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
-                        <tr style="background: rgba(0, 119, 181, 0.05); border-bottom: 1px solid var(--glass-border);">
-                            <th style="padding: 1.5rem;">Full Name</th>
-                            <th style="padding: 1.5rem;">Prof. Score</th>
+                        <tr style="background: rgba(168, 85, 247, 0.05); border-bottom: 1px solid var(--glass-border);">
+                            <th style="padding: 1.5rem;">Match Title</th>
+                            <th style="padding: 1.5rem;">Match %</th>
                             <th style="padding: 1.5rem;">Date</th>
                             <th style="padding: 1.5rem;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for report in linkedin_reports %}
-                            <tr style="border-bottom: 1px solid var(--glass-border); transition: 0.3s;" onmouseover="this.style.background='rgba(0, 119, 181, 0.02)'" onmouseout="this.style.background='transparent'">
-                                <td style="padding: 1.5rem; font-weight: 600;">{{ report.full_name }}</td>
+                        {% for report in jd_reports %}
+                            <tr style="border-bottom: 1px solid var(--glass-border); transition: 0.3s;" onmouseover="this.style.background='rgba(168, 85, 247, 0.02)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1.5rem; font-weight: 600;">JD Match #{{ forloop.revindex }}</td>
                                 <td style="padding: 1.5rem;">
-                                    <span style="background: #0077b5; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
-                                        {{ report.professional_score }}/100
+                                    <span style="background: #a855f7; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem;">
+                                        {{ report.match_score }}%
                                     </span>
                                 </td>
                                 <td style="padding: 1.5rem; color: var(--text-dim);">{{ report.created_at|date:"M j, Y" }}</td>
                                 <td style="padding: 1.5rem; display: flex; gap: 0.5rem;">
-                                    <a href="{% url 'linkedin_result' report.id %}" class="btn" style="background: rgba(0, 119, 181, 0.1); color: #0077b5; padding: 0.4rem 0.8rem;">View</a>
-                                    <form action="{% url 'delete_linkedin_report' report.id %}" method="POST" onsubmit="return confirm('Delete this LinkedIn report?')">
+                                    <a href="{% url 'jd_match_result' report.id %}" class="btn" style="background: rgba(168, 85, 247, 0.1); color: #a855f7; padding: 0.4rem 0.8rem;">View</a>
+                                    <form action="{% url 'delete_jd_report' report.id %}" method="POST" onsubmit="return confirm('Delete this JD report?')">
                                         {% csrf_token %}
                                         <button type="submit" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 0.4rem 0.8rem;"><i class="fas fa-trash"></i></button>
                                     </form>
@@ -97,7 +97,7 @@
             </div>
         {% else %}
             <div class="glass-card" style="text-align: center; padding: 3rem;">
-                <p style="color: var(--text-dim);">No LinkedIn reports found.</p>
+                <p style="color: var(--text-dim);">No JD match reports found.</p>
             </div>
         {% endif %}
     </div>
@@ -106,23 +106,23 @@
 <script>
     function switchHistoryTab(type) {
         const ghTab = document.getElementById('tab-github');
-        const lnTab = document.getElementById('tab-linkedin');
+        const jdTab = document.getElementById('tab-jd');
         const ghSection = document.getElementById('github-history');
-        const lnSection = document.getElementById('linkedin-history');
+        const jdSection = document.getElementById('jd-history');
 
         if (type === 'github') {
             ghTab.style.background = 'var(--primary)';
             ghTab.style.color = 'white';
-            lnTab.style.background = 'transparent';
-            lnTab.style.color = 'var(--text-dim)';
+            jdTab.style.background = 'transparent';
+            jdTab.style.color = 'var(--text-dim)';
             ghSection.style.display = 'block';
-            lnSection.style.display = 'none';
+            jdSection.style.display = 'none';
         } else {
-            lnTab.style.background = '#0077b5';
-            lnTab.style.color = 'white';
+            jdTab.style.background = '#a855f7';
+            jdTab.style.color = 'white';
             ghTab.style.background = 'transparent';
             ghTab.style.color = 'var(--text-dim)';
-            lnSection.style.display = 'block';
+            jdSection.style.display = 'block';
             ghSection.style.display = 'none';
         }
     }

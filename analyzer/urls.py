@@ -8,8 +8,8 @@ urlpatterns = [
     path('history/', views.history, name='history'),
     path('compare/', views.compare_users, name='compare'),
     path('delete/<uuid:report_id>/', views.delete_report, name='delete_report'),
-    path('delete-linkedin/<int:report_id>/', views.delete_linkedin_report, name='delete_linkedin_report'),
+    path('delete-jd/<uuid:report_id>/', views.delete_jd_report, name='delete_jd_report'),
     path('share/<uuid:report_id>/', views.share_report, name='share_report'),
-    path('linkedin/', views.analyze_linkedin, name='analyze_linkedin'),
-    path('linkedin/result/<int:report_id>/', views.linkedin_result, name='linkedin_result'),
+    path('match-jd/', views.match_jd, name='match_jd'),
+    path('match-jd/result/<uuid:report_id>/', views.jd_match_result, name='jd_match_result'),
 ]

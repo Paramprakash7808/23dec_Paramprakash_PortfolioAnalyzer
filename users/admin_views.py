@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Profile, AdminActionLog
-from analyzer.models import AnalysisReport, LinkedInReport
+from analyzer.models import AnalysisReport, JDMatchReport
 
 def is_staff(user):
     return user.is_staff
@@ -23,8 +23,8 @@ def admin_dashboard(request):
     
     total_users = users.count()
     github_reports_count = AnalysisReport.objects.count()
-    linkedin_reports_count = LinkedInReport.objects.count()
-    total_reports_count = github_reports_count + linkedin_reports_count
+    jd_reports_count = JDMatchReport.objects.count()
+    total_reports_count = github_reports_count + jd_reports_count
     blocked_users_count = Profile.objects.filter(is_blocked=True).count()
     
     # Global Analytics (Technical focused)
@@ -49,7 +49,7 @@ def admin_dashboard(request):
         'total_users': total_users,
         'total_reports': total_reports_count,
         'github_count': github_reports_count,
-        'linkedin_count': linkedin_reports_count,
+        'jd_count': jd_reports_count,
         'blocked_users': blocked_users_count,
         'avg_score': round(avg_score, 1),
         'top_languages': top_languages,
@@ -62,28 +62,27 @@ def admin_dashboard(request):
 def admin_user_reports(request, user_id):
     user_to_view = get_object_or_404(User, id=user_id)
     github_reports = AnalysisReport.objects.filter(user=user_to_view).order_by('-created_at')
-    linkedin_reports = LinkedInReport.objects.filter(user=user_to_view).order_by('-created_at')
+    jd_reports = JDMatchReport.objects.filter(user=user_to_view).order_by('-created_at')
     
     context = {
         'user_to_view': user_to_view,
         'github_reports': github_reports,
-        'linkedin_reports': linkedin_reports,
+        'jd_reports': jd_reports,
     }
     return render(request, 'users/admin/user_reports.html', context)
 
 @user_passes_test(is_staff)
-def admin_delete_linkedin_report(request, report_id):
-    report = get_object_or_404(LinkedInReport, id=report_id)
+def admin_delete_jd_report(request, report_id):
+    report = get_object_or_404(JDMatchReport, id=report_id)
     user_id = report.user.id if report.user else None
-    name = report.full_name
     
     AdminActionLog.objects.create(
         admin=request.user,
-        action=f"Deleted LinkedIn report for {name}"
+        action=f"Deleted JD Match report (ID: {report_id})"
     )
     
     report.delete()
-    messages.success(request, f"LinkedIn report for {name} has been deleted.")
+    messages.success(request, f"JD Match report has been deleted.")
     if user_id:
         return redirect('admin_user_reports', user_id=user_id)
     return redirect('admin_dashboard')

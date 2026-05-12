@@ -25,35 +25,26 @@ class AnalysisReport(models.Model):
     def __str__(self):
         return f"{self.github_username} - {self.score}/100 ({self.created_at.strftime('%Y-%m-%d')})"
 
-class LinkedInReport(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='linkedin_reports', null=True, blank=True)
-    full_name = models.CharField(max_length=200)
-    headline = models.CharField(max_length=255, blank=True)
+class JDMatchReport(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jd_reports', null=True, blank=True)
     
     # Textual Content
-    profile_text = models.TextField()
+    summary_text = models.TextField()
+    jd_text = models.TextField()
     
     # Analysis Metrics
-    professional_score = models.IntegerField(default=0)
-    summary_strength = models.IntegerField(default=0)
-    experience_impact = models.IntegerField(default=0)
-    keyword_density = models.IntegerField(default=0)
+    match_score = models.IntegerField(default=0)
     
     # Detail Lists
-    impact_keywords = models.JSONField(default=list)
+    matched_skills = models.JSONField(default=list)
+    missing_skills = models.JSONField(default=list)
     suggestions = models.JSONField(default=list)
-    missing_elements = models.JSONField(default=list)
-    
-    # Advanced Power-Up Fields
-    target_jd = models.TextField(blank=True, null=True)
-    jd_match_score = models.IntegerField(default=0)
-    suggested_headlines = models.JSONField(default=list)
-    experience_data = models.JSONField(default=list)  # Stores parsed timeline data
     
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"LinkedIn: {self.full_name} ({self.professional_score}/100)"
+        return f"JD Match: {self.match_score}/100 ({self.created_at.strftime('%Y-%m-%d')})"
 
 
 class ComparisonHistory(models.Model):

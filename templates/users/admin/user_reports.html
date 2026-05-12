@@ -56,27 +56,27 @@
     {% endif %}
 
     <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
-        <i class="fab fa-linkedin" style="color: #0077b5;"></i> Professional Reports (LinkedIn: {{ linkedin_reports.count }})
+        <i class="fas fa-file-contract" style="color: #a855f7;"></i> JD Match Reports (JD: {{ jd_reports.count }})
     </h3>
 
-    {% if linkedin_reports %}
+    {% if jd_reports %}
     <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-        {% for report in linkedin_reports %}
-        <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; transition: 0.3s;" onmouseover="this.style.border='1px solid #0077b5'" onmouseout="this.style.border='1px solid var(--glass-border)'">
+        {% for report in jd_reports %}
+        <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; transition: 0.3s;" onmouseover="this.style.border='1px solid #a855f7'" onmouseout="this.style.border='1px solid var(--glass-border)'">
             <div style="display: flex; align-items: center; gap: 2rem;">
-                <div style="background: #0077b5; color: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">
-                    {{ report.professional_score }}
+                <div style="background: #a855f7; color: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;">
+                    {{ report.match_score }}
                 </div>
                 <div>
-                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.2rem;">{{ report.full_name }}</div>
+                    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.2rem;">JD Match #{{ forloop.revindex }}</div>
                     <div style="font-size: 0.85rem; color: var(--text-dim);">
                         <i class="far fa-calendar-alt"></i> {{ report.created_at|date:"F d, Y H:i" }}
                     </div>
                 </div>
             </div>
             <div style="display: flex; gap: 1rem;">
-                <a href="{% url 'linkedin_result' report.id %}" class="btn btn-outline" style="font-size: 0.85rem;">View Result</a>
-                <button onclick="confirmDeleteReport('{{ report.id }}', 'linkedin')" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.85rem;">
+                <a href="{% url 'jd_match_result' report.id %}" class="btn btn-outline" style="font-size: 0.85rem;">View Result</a>
+                <button onclick="confirmDeleteReport('{{ report.id }}', 'jd')" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.85rem;">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -85,7 +85,7 @@
     </div>
     {% else %}
     <div class="glass-card" style="text-align: center; padding: 2rem;">
-        <p style="color: var(--text-dim);">No LinkedIn reports found.</p>
+        <p style="color: var(--text-dim);">No JD match reports found.</p>
     </div>
     {% endif %}
 </div>
@@ -111,7 +111,7 @@
         if (type === 'github') {
             url = `/users/admin-dashboard/delete-report/${reportId}/`;
         } else {
-            url = `/users/admin-dashboard/delete-linkedin-report/${reportId}/`;
+            url = `/users/admin-dashboard/delete-jd-report/${reportId}/`;
         }
         document.getElementById('confirmDeleteReportBtn').href = url;
         document.getElementById('deleteReportModal').style.display = 'flex';
