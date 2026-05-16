@@ -2,6 +2,16 @@
 
 {% block title %}Admin Dashboard - Portfolio Analyzer{% endblock %}
 
+{% block extra_css %}
+<style>
+    .text-success { color: #22c55e !important; }
+    .text-warning { color: #fca311 !important; }
+    .text-danger { color: #ef4444 !important; }
+    .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--secondary); border-radius: 3px; width: var(--progress); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div style="margin-top: 2rem; margin-bottom: 4rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
@@ -39,8 +49,8 @@
                             <span>{{ lang }}</span>
                             <span style="color: var(--text-dim);">{{ count }}</span>
                         </div>
-                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
-                            <div style="width: {% widthratio count total_reports 100 %}%; height: 100%; background: var(--secondary); border-radius: 3px;"></div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="--progress: {% widthratio count total_reports 100 %}%;"></div>
                         </div>
                     </div>
                 {% endfor %}
@@ -95,8 +105,19 @@
                             </td>
                             <td style="padding: 1rem 1.5rem; text-align: right;">
                                 <div style="display: flex; justify-content: flex-end; gap: 0.4rem;">
-                                    <a href="{% url 'toggle_user_block' u.id %}" title="{% if u.profile.is_blocked %}Unblock{% else %}Block{% endif %}" style="color: {% if u.profile.is_blocked %}#22c55e{% else %}#fca311{% endif %}; font-size: 1rem;"><i class="fas {% if u.profile.is_blocked %}fa-user-check{% else %}fa-user-slash{% endif %}"></i></a>
-                                    <button onclick="confirmDelete({{ u.id }}, '{{ u.username }}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem;"><i class="fas fa-trash"></i></button>
+                                    <a href="{% url 'toggle_user_block' u.id %}" 
+                                       title="{% if u.profile.is_blocked %}Unblock{% else %}Block{% endif %}" 
+                                       class="{% if u.profile.is_blocked %}text-success{% else %}text-warning{% endif %}" 
+                                       style="font-size: 1rem;">
+                                        <i class="fas {% if u.profile.is_blocked %}fa-user-check{% else %}fa-user-slash{% endif %}"></i>
+                                    </a>
+                                    <button onclick="confirmDelete(this.dataset.id, this.dataset.username)" 
+                                            data-id="{{ u.id }}" 
+                                            data-username="{{ u.username }}"
+                                            class="text-danger"
+                                            style="background: none; border: none; cursor: pointer; font-size: 1rem;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

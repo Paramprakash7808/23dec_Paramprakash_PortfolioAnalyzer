@@ -1,11 +1,12 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views, admin_views
+from .forms import UserLoginForm
 
 urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
-    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html', authentication_form=UserLoginForm), name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('delete-account/', views.delete_account, name='delete_account'),
     # ... (other auth paths)

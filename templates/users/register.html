@@ -7,6 +7,15 @@
     <h2 style="margin-bottom: 2rem; text-align: center; font-size: 2rem;">Create Account</h2>
     <form method="POST">
         {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-error" style="margin-bottom: 1.5rem; padding: 0.8rem; font-size: 0.9rem;">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         {% for field in form %}
             <div class="form-group">
                 <label>{{ field.label }}</label>
